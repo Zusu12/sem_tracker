@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Syllabus Checklist Tracker</title>
+    <style>
+        :root {
+            --color-primary: #208090;
+            --color-primary-hover: #1a6a78;
+            --color-background: #1a1a1a;
+            --color-surface: #2d2d2d;
+            --color-text: #f5f5f5;
+            --color-text-secondary: #b0b0b0;
+            --color-border: #444;
+            --color-success: #22b14c;
+            --font-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-base);
+            background-color: var(--color-background);
+            color: var(--color-text);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: var(--color-surface);
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 28px;
+            color: var(--color-primary);
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--color-success);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin-top: 4px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--color-primary-hover);
+        }
+
+        .btn-secondary {
+            background: #505050;
+            color: var(--color-text);
+        }
+
+        .btn-secondary:hover {
+            background: #606060;
+        }
+
+        .subjects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .subject-card {
+            background: var(--color-surface);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .subject-header {
+            background: var(--color-primary);
+            color: white;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .subject-header:hover {
+            background: var(--color-primary-hover);
+        }
+
+        .subject-content {
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .subject-content.expanded {
+            max-height: 3000px;
+        }
+
+        .main-topic {
+            border-bottom: 1px solid #444;
+        }
+
+        .main-topic:last-child {
+            border-bottom: none;
+        }
+
+        .main-topic-header {
+            background: #252525;
+            padding: 12px 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+            user-select: none;
+        }
+
+        .main-topic-header:hover {
+            background: #303030;
+        }
+
+        .main-topic-header input[type="checkbox"] {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            accent-color: var(--color-primary);
+            margin-right: 10px;
+        }
+
+        .main-topic-label {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .expand-arrow {
+            font-size: 12px;
+            transition: transform 0.2s ease;
+            margin-left: 8px;
+        }
+
+        .expand-arrow.expanded {
+            transform: rotate(180deg);
+        }
+
+        .sub-topics {
+            display: none;
+            background: #1f1f1f;
+            padding: 8px 0;
+        }
+
+        .sub-topics.expanded {
+            display: block;
+        }
+
+        .sub-topic-item {
+            padding: 8px 16px 8px 56px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid #333;
+            font-size: 13px;
+        }
+
+        .sub-topic-item:last-child {
+            border-bottom: none;
+        }
+
+        .sub-topic-item input[type="checkbox"] {
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+            accent-color: var(--color-primary);
+            flex-shrink: 0;
+        }
+
+        .sub-topic-label {
+            flex: 1;
+            cursor: pointer;
+            line-height: 1.3;
+        }
+
+        .sub-topic-item input[type="checkbox"]:checked + .sub-topic-label {
+            color: var(--color-text-secondary);
+            text-decoration: line-through;
+        }
+
+        .progress-bar {
+            background: #444;
+            height: 3px;
+            margin-top: 0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: var(--color-success);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .export-section {
+            background: var(--color-surface);
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 12px;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 12px;
+                padding: 16px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            .header-stats {
+                width: 100%;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .controls {
+                width: 100%;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            button {
+                padding: 8px 12px;
+                font-size: 12px;
+                flex: 1;
+                min-width: 80px;
+            }
+
+            .subjects-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sub-topic-item {
+                padding: 8px 12px 8px 48px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Syllabus Checklist Tracker</h1>
+            <div class="header-stats">
+                <div class="stat">
+                    <div class="stat-value" id="totalCompleted">0</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="totalTopics">0</div>
+                    <div class="stat-label">Total Topics</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="progressPercent">0%</div>
+                    <div class="stat-label">Overall Progress</div>
+                </div>
+                <div class="controls">
+                    <button class="btn-primary" onclick="markAllComplete()">✅ Mark All</button>
+                    <button class="btn-primary" onclick="exportToGoogle()">📄 Export</button>
+                    <button class="btn-secondary" onclick="resetAll()">🔄 Reset All</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="subjects-grid" id="subjectsContainer"></div>
+
+        <div class="export-section">
+            <h3>💡 Tip: Check topics hierarchically and track progress!</h3>
+            <p>Your progress is automatically saved. Expand topics to see sub-topics.</p>
+        </div>
+    </div>
+
+    <script>
+        const syllabus = {
+            "DATA COMMUNICATIONS & COMPUTER NETWORKS": {
+                "Introduction to Data Communications": [
+                    "A Communications Model",
+                    "Network Models (OSI, TCP/IP models)",
+                    "Analog and Digital Data Transmission",
+                    "Transmission Impairments"
+                ],
+                "Data Communication Interface": [
+                    "Asynchronous and Synchronous Transmission",
+                    "Data Link Control Flow Control",
+                    "Error Detection",
+                    "Error Control",
+                    "High-Level Data Link Control (HDLC)"
+                ],
+                "Signal Encoding Techniques": [
+                    "Digital data to Digital signal",
+                    "Digital to Analog Signal",
+                    "Analog data to Digital Signal",
+                    "Analog Data to Analog signal"
+                ],
+                "Multiplexing": [
+                    "Frequency-Division Multiplexing",
+                    "Synchronous Time-Division Multiplexing",
+                    "Digital Carrier Systems",
+                    "Statistical Time-Division Multiplexing"
+                ],
+                "Medium Access Control": [
+                    "Wireless LAN 802.11 Architecture",
+                    "Protocol Stack",
+                    "802.11 Frame structure"
+                ],
+                "Network Layer": [
+                    "Network Layer Design Issues",
+                    "Shortest path routing algorithm",
+                    "Congestion Control Algorithms",
+                    "IP Protocol",
+                    "IP Address"
+                ],
+                "Transport Layer": [
+                    "Transport Service",
+                    "Elements of Transport Protocols",
+                    "TCP and UDP Protocols",
+                    "Simple Network Management Protocol (SNMP)"
+                ]
+            },
+            "ARTIFICIAL INTELLIGENCE": {
+                "Introduction to Artificial Intelligence": [
+                    "Artificial Intelligence",
+                    "AI Problems",
+                    "AI Techniques",
+                    "Defining the Problem as a State Space Search",
+                    "Production Systems",
+                    "Control strategies",
+                    "Uninformed search using BFS and DFS",
+                    "Heuristic search",
+                    "Problem Characteristics",
+                    "Production system categories for AI problem solving"
+                ],
+                "Heuristic Search Techniques": [
+                    "Issues in The Design of Search Programs",
+                    "Generate-And-Test",
+                    "Hill Climbing and its variants",
+                    "Best-First Search",
+                    "A* Algorithm",
+                    "Problem Reduction",
+                    "AO* Algorithm",
+                    "Constraint Satisfaction",
+                    "Means-Ends Analysis"
+                ],
+                "Knowledge Representation using Predicate Logic and Rules": [
+                    "Propositional Logic",
+                    "First Order Predicate Logic: Representing Instance and is-a Relationships",
+                    "Computable Functions and Predicates",
+                    "Resolution in propositional logic",
+                    "Resolution in predicate logic with Clause form",
+                    "Unification & Resolution algorithm",
+                    "Question answering",
+                    "Procedural Vs Declarative Knowledge",
+                    "Logic programming with Prolog",
+                    "Forward Vs Backward Reasoning and combining them",
+                    "Matching Techniques",
+                    "Matching with variables",
+                    "RETE Algorithm",
+                    "Conflict resolution"
+                ],
+                "Reasoning under Uncertainty": [
+                    "Introduction to Non-Monotonic Reasoning",
+                    "Logics for Non monotonic reasoning",
+                    "Depth first search with Dependency-directed backtracking",
+                    "Justification based Truth Maintenance System"
+                ],
+                "System, Statistical Reasoning": [
+                    "Bayes Theorem for probabilistic inference",
+                    "Certainty Factors and Rule-Based Systems",
+                    "Bayesian Belief Networks",
+                    "Dempster Shafer Theory",
+                    "Fuzzy Logic"
+                ],
+                "Structured Representations of Knowledge": [
+                    "Semantic Nets, representing non-binary predicates",
+                    "Partitioned Semantic Nets",
+                    "Frames as sets and instances",
+                    "Slots as full-fledged Objects",
+                    "Property Inheritance through tangled hierarchies",
+                    "Conceptual Dependency",
+                    "Conceptual Dependency Graphs",
+                    "Scripts, examples in natural language understanding",
+                    "Merits and demerits of strong slot filler structures"
+                ],
+                "Natural Language Processing and Planning": [
+                    "Steps in Natural Language Processing",
+                    "Syntactic Processing and Augmented Transition Nets",
+                    "Semantic Analysis and grammars",
+                    "Discourse and pragmatic processing",
+                    "Components of a Planning System",
+                    "Goal Stack Planning",
+                    "Non-linear Planning using Constraint Posting",
+                    "Hierarchical Planning",
+                    "Reactive Systems"
+                ],
+                "Experts Systems": [
+                    "Overview of an Expert System",
+                    "Applications of expert systems",
+                    "Components of an Expert System",
+                    "Expert system development",
+                    "Rule Based, Frame Based, Neural Network based Expert Systems",
+                    "Black Board Architectures",
+                    "Case studies of successful expert systems",
+                    "Expert System Shells",
+                    "Knowledge Acquisition and Validation Techniques"
+                ]
+            },
+            "COMPILER DESIGN": {
+                "Introduction": [
+                    "Introduction to Compilers and Language processors",
+                    "Programming Language basics",
+                    "Structure & Different Phases of a Compiler",
+                    "Review of Compiler Structure",
+                    "Structure of Optimizing Compilation",
+                    "Compiler construction tools",
+                    "Boot strapping",
+                    "Cross compilers"
+                ],
+                "Finite Automata & Lexical Analysis": [
+                    "Introduction to Lexical Analysis",
+                    "Lexical Analyzers",
+                    "Approaches to design Lexical Analysers",
+                    "Language for specifying lexical analyzers",
+                    "Introduction to Finite automata",
+                    "Regular Expressions & Languages",
+                    "Recognition of Tokens",
+                    "Transition Diagrams",
+                    "Implementation of lexical analyzers",
+                    "Lexical Analyzer Generator LEX"
+                ],
+                "Syntax Analysis": [
+                    "Syntactic Specification of Programming Languages",
+                    "Context Free Grammars & Languages",
+                    "Introduction to Parsers",
+                    "Top-down parsing techniques: Brute force parsing",
+                    "Recursive Descent Parsing",
+                    "Predictive Parsing",
+                    "Bottom-up Parsing: Shift replace parsing",
+                    "Operator parsing",
+                    "LR (k) parsing"
+                ],
+                "Semantic Analysis and Intermediate Code Generation": [
+                    "Semantic Actions",
+                    "Syntax Directed Translations",
+                    "Translation on the parse Tree",
+                    "Implementation of Syntax Directed Translator",
+                    "Intermediate Codes",
+                    "Syntax Directed translation to Postfix code",
+                    "Syntax Trees",
+                    "Intermediate Code Generation",
+                    "Three Address Code",
+                    "Translation of Expressions",
+                    "Type Checking & Type Conversions"
+                ],
+                "Code Optimization": [
+                    "Principal sources of Code Optimization",
+                    "Loop Optimization",
+                    "Basic Blocks & Flow Graphs",
+                    "DAG Representation of Basic Blocks",
+                    "Applications of DAG",
+                    "Local Optimization",
+                    "Unreachable Code Elimination",
+                    "Dead Code Elimination",
+                    "Data Flow Analysis",
+                    "Data Flow Equations & Computations",
+                    "Peep-Hole Optimization"
+                ],
+                "Machine Dependent Optimizations": [
+                    "Machine Dependent Optimizations",
+                    "Overview of Informal Compiler Algorithm Notation (ICAN)",
+                    "If Simplification",
+                    "Loop Simplification",
+                    "Loop Inversion",
+                    "Branch Optimization and Prediction"
+                ],
+                "Code Generation and Code Scheduling": [
+                    "Issues in Code Generation",
+                    "Input to Code Generator",
+                    "Instruction Selection",
+                    "Register Allocation",
+                    "Simple Target Machine Model",
+                    "Program and Instruction Costs",
+                    "Register allocation & Assignments",
+                    "Code Generation Algorithm",
+                    "Code Generators",
+                    "Optimal Code Generation for Expressions",
+                    "Code Generation From DAG"
+                ],
+                "Symbol Tables, Runtime Environment and Error Handling": [
+                    "Contents of a Symbol Table",
+                    "Data Structures for Symbol Tables",
+                    "Run time Environments",
+                    "Implementation of a simple Stack allocation",
+                    "Heap Management",
+                    "Block Structured Languages",
+                    "Error Detection & Recovery",
+                    "Lexical Phase Errors",
+                    "Syntactic & Semantic Errors",
+                    "Error Handling Routines"
+                ]
+            },
+            "CLOUD COMPUTING": {
+                "History of Computing Paradigms": [
+                    "Overview of Distributed Computing",
+                    "Cluster Computing",
+                    "Grid Computing",
+                    "Ubiquitous Computing",
+                    "Peer-to-Peer Computing",
+                    "Distributed System Models and Enabling Technologies"
+                ],
+                "Introduction to Cloud Computing": [
+                    "Cloud Computing and Service Models",
+                    "Public, Private, and Hybrid Clouds",
+                    "Cloud Ecosystem and Enabling Technologies",
+                    "Infrastructure-as-a-Service (IaaS)",
+                    "Platform-as-a-Service (PaaS)",
+                    "Software-as-a-Service (SaaS)"
+                ],
+                "Virtual Machines and Virtualization": [
+                    "Implementation Levels of Virtualization",
+                    "VMM Design Requirements and Providers",
+                    "Virtualization Support at the OS Level",
+                    "Middleware Support for Virtualization",
+                    "Virtualization Structures/Tools and Mechanisms",
+                    "Virtualization of CPU, Memory and I/O Devices",
+                    "Virtual Clusters and Resource Management"
+                ],
+                "Public Cloud Platform-Architectures and Programming": [
+                    "Google App Engine (GAE)",
+                    "Amazon Web Services (AWS)",
+                    "Microsoft Windows Azure",
+                    "Service Oriented Architecture: REST",
+                    "Publish Subscribe Model"
+                ],
+                "Storage Systems": [
+                    "Storage Models, File Systems, and Databases",
+                    "Distributed File Systems",
+                    "General Parallel File System",
+                    "Google File Systems",
+                    "Apache Hadoop",
+                    "Locks and Chubby: A Locking Service",
+                    "Transaction Processing and NoSQL Databases",
+                    "Big Table",
+                    "Mega Store"
+                ],
+                "Case Studies": [
+                    "The Grep The Web Application",
+                    "Aneka Application of Maya Rendering Case Study"
+                ]
+            },
+            "RECOMMENDER SYSTEMS": {
+                "Collaborative Recommendations": [
+                    "User-based nearest neighbor recommendation",
+                    "Item-based nearest neighbor recommendation",
+                    "About ratings",
+                    "Model-based and Preprocessing-based approaches",
+                    "Recent practical approaches and Systems"
+                ],
+                "Content-based Recommendation": [
+                    "Content representation and content similarity",
+                    "Similarity-based retrieval",
+                    "Other text classification methods"
+                ],
+                "Knowledge-based Recommendation": [
+                    "Introduction",
+                    "Knowledge representation and reasoning",
+                    "Interacting with constraint-based recommenders",
+                    "Interacting with case-based recommenders",
+                    "Example applications"
+                ],
+                "Hybrid Recommendation Approaches": [
+                    "Opportunities for hybridization",
+                    "Monolithic hybridization design",
+                    "Parallelized hybridization design",
+                    "Pipelined hybridization design"
+                ],
+                "Evaluating Recommender Systems": [
+                    "Introduction",
+                    "General properties of evaluation research",
+                    "Popular evaluation designs",
+                    "Evaluation on historical datasets",
+                    "Alternate evaluation designs"
+                ],
+                "Attacks on Collaborative Recommender Systems": [
+                    "A first example",
+                    "Attack dimensions",
+                    "Attack types",
+                    "Evaluation of effectiveness and countermeasures",
+                    "Countermeasures",
+                    "Privacy aspects - distributed collaborative filtering"
+                ],
+                "Online Consumer Decision Making": [
+                    "Introduction",
+                    "Context effects",
+                    "Primacy/recency effects",
+                    "Further effects",
+                    "Personality and social psychology",
+                    "Recommender systems and the next-generation web",
+                    "Trust aware recommender systems",
+                    "Folksonomies and more",
+                    "Ontological filtering",
+                    "Extracting semantics from the web"
+                ]
+            }
+        };
+
+        let checkboxStates = {};
+
+        function initializeApp() {
+            loadProgress();
+            renderSubjects();
+            updateStats();
+        }
+
+        function renderSubjects() {
+            const container = document.getElementById('subjectsContainer');
+            container.innerHTML = '';
+
+            Object.entries(syllabus).forEach(([subject, mainTopics], subjectIndex) => {
+                const card = document.createElement('div');
+                card.className = 'subject-card';
+
+                const header = document.createElement('div');
+                header.className = 'subject-header';
+                header.textContent = subject;
+                header.onclick = () => toggleSubject(subjectContent);
+
+                const subjectContent = document.createElement('div');
+                subjectContent.className = 'subject-content';
+
+                Object.entries(mainTopics).forEach(([mainTopic, subTopics], mainIndex) => {
+                    const mainTopicDiv = document.createElement('div');
+                    mainTopicDiv.className = 'main-topic';
+
+                    const mainTopicHeader = document.createElement('div');
+                    mainTopicHeader.className = 'main-topic-header';
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    const uniqueId = `${subjectIndex}-${mainIndex}`;
+                    checkbox.id = `main-${uniqueId}`;
+                    checkbox.checked = checkboxStates[`main-${uniqueId}`] || false;
+
+                    const label = document.createElement('label');
+                    label.className = 'main-topic-label';
+                    label.htmlFor = `main-${uniqueId}`;
+                    label.innerHTML = `${mainTopic} <span class="expand-arrow">▼</span>`;
+
+                    mainTopicHeader.appendChild(checkbox);
+                    mainTopicHeader.appendChild(label);
+
+                    const subTopicsDiv = document.createElement('div');
+                    subTopicsDiv.className = 'sub-topics';
+
+                    subTopics.forEach((subTopic, subIndex) => {
+                        const subItem = document.createElement('div');
+                        subItem.className = 'sub-topic-item';
+
+                        const subCheckbox = document.createElement('input');
+                        subCheckbox.type = 'checkbox';
+                        const subUniqueId = `${subjectIndex}-${mainIndex}-${subIndex}`;
+                        subCheckbox.id = `sub-${subUniqueId}`;
+                        subCheckbox.checked = checkboxStates[`sub-${subUniqueId}`] || false;
+
+                        const subLabel = document.createElement('label');
+                        subLabel.className = 'sub-topic-label';
+                        subLabel.htmlFor = `sub-${subUniqueId}`;
+                        subLabel.textContent = subTopic;
+
+                        subCheckbox.onchange = () => {
+                            checkboxStates[`sub-${subUniqueId}`] = subCheckbox.checked;
+                            updateMainTopicCheckbox(checkbox, mainTopics, mainTopic, subjectIndex, mainIndex);
+                            saveProgress();
+                            updateStats();
+                        };
+
+                        subItem.appendChild(subCheckbox);
+                        subItem.appendChild(subLabel);
+                        subTopicsDiv.appendChild(subItem);
+                    });
+
+                    checkbox.onchange = () => {
+                        checkboxStates[`main-${uniqueId}`] = checkbox.checked;
+                        subTopics.forEach((_, subIndex) => {
+                            const subUniqueId = `${subjectIndex}-${mainIndex}-${subIndex}`;
+                            checkboxStates[`sub-${subUniqueId}`] = checkbox.checked;
+                        });
+                        const subCheckboxes = subTopicsDiv.querySelectorAll('input[type="checkbox"]');
+                        subCheckboxes.forEach(cb => cb.checked = checkbox.checked);
+                        saveProgress();
+                        updateStats();
+                    };
+
+                    mainTopicHeader.onclick = (e) => {
+                        if (e.target.tagName !== 'INPUT') {
+                            subTopicsDiv.classList.toggle('expanded');
+                            label.querySelector('.expand-arrow').classList.toggle('expanded');
+                        }
+                    };
+
+                    mainTopicDiv.appendChild(mainTopicHeader);
+                    mainTopicDiv.appendChild(subTopicsDiv);
+                    subjectContent.appendChild(mainTopicDiv);
+                });
+
+                card.appendChild(header);
+                card.appendChild(subjectContent);
+                container.appendChild(card);
+            });
+
+            updateStats();
+        }
+
+        function updateMainTopicCheckbox(mainCheckbox, mainTopics, mainTopic, subjectIndex, mainIndex) {
+            const subCheckboxes = document.querySelectorAll(`input[id^="sub-${subjectIndex}-${mainIndex}"]`);
+            const allChecked = Array.from(subCheckboxes).every(cb => cb.checked);
+            mainCheckbox.checked = allChecked;
+        }
+
+        function toggleSubject(content) {
+            content.classList.toggle('expanded');
+        }
+
+        function updateStats() {
+            let totalCompleted = 0;
+            let totalTopics = 0;
+
+            Object.keys(checkboxStates).forEach(key => {
+                if (key.startsWith('sub-')) {
+                    totalTopics++;
+                    if (checkboxStates[key]) {
+                        totalCompleted++;
+                    }
+                }
+            });
+
+            document.getElementById('totalCompleted').textContent = totalCompleted;
+            document.getElementById('totalTopics').textContent = totalTopics;
+            const percentage = totalTopics > 0 ? Math.round((totalCompleted / totalTopics) * 100) : 0;
+            document.getElementById('progressPercent').textContent = percentage + '%';
+        }
+
+        function saveProgress() {
+            localStorage.setItem('syllabusProgress', JSON.stringify(checkboxStates));
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem('syllabusProgress');
+            if (saved) {
+                checkboxStates = JSON.parse(saved);
+            }
+        }
+
+        function markAllComplete() {
+            if (confirm('Mark all topics as completed?')) {
+                Object.keys(checkboxStates).forEach(key => {
+                    checkboxStates[key] = true;
+                });
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+                saveProgress();
+                updateStats();
+            }
+        }
+
+        function resetAll() {
+            if (confirm('Are you sure you want to reset all progress?')) {
+                checkboxStates = {};
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                saveProgress();
+                updateStats();
+            }
+        }
+
+        function exportToGoogle() {
+            let text = '📚 SYLLABUS CHECKLIST TRACKER\n';
+            text += '================================\n\n';
+
+            Object.entries(syllabus).forEach(([subject, mainTopics]) => {
+                text += `${subject}\n`;
+                Object.entries(mainTopics).forEach(([mainTopic, subTopics]) => {
+                    text += `  ${mainTopic}\n`;
+                    subTopics.forEach(subTopic => {
+                        text += `    - ${subTopic}\n`;
+                    });
+                });
+                text += '\n';
+            });
+
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Syllabus_Checklist.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        window.addEventListener('load', initializeApp);
+    </script>
+</body>
+</html>
